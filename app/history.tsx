@@ -151,3 +151,7 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: "#fff", fontWeight: "700" },
 });
+
+export const options = {
+  title: "Invoice History",
+};

@@ -8,6 +8,7 @@ export type Invoice = {
   invoiceNumber?: string;
   itemCount?: number;
   pdfUri?: string;
+  images?: string[];
 };
 
 const STORAGE_KEY = "SCANIFY_INVOICES";
@@ -49,5 +50,33 @@ export async function clearInvoices() {
     await AsyncStorage.removeItem(STORAGE_KEY);
   } catch (e) {
     console.error("clearInvoices error:", e);
+  }
+}
+
+const VENDOR_KEY = "SCANIFY_VENDORS";
+
+// ✅ Save vendor to dropdown list
+export async function saveVendorName(name: string) {
+  if (!name) return;
+  try {
+    const raw = await AsyncStorage.getItem(VENDOR_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    if (!list.includes(name)) {
+      list.unshift(name);
+      const limited = list.slice(0, 5); // keep only latest 5
+      await AsyncStorage.setItem(VENDOR_KEY, JSON.stringify(limited));
+    }
+  } catch (e) {
+    console.error("saveVendorName error:", e);
+  }
+}
+
+// ✅ Load vendor list
+export async function loadVendors(): Promise<string[]> {
+  try {
+    const raw = await AsyncStorage.getItem(VENDOR_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
   }
 }

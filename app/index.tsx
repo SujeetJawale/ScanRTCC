@@ -1,6 +1,8 @@
 import { Link } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-
+export const options = {
+  title: "Scanify",
+};
 export default function Home() {
   return (
     <View style={styles.container}>

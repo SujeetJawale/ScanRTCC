@@ -1,45 +1,60 @@
-import * as FileSystem from "expo-file-system";
+// Replace with your real key later
+import * as FileSystem from "expo-file-system/legacy";
 
-/**
- * Runs OCR using OCR.Space free API.
- * Works with Expo SDK 54+ (no deprecated FileSystem calls)
- */
-const OCR_API_KEY = "K82166208188957"; // Replace with your real key later
+const OCR_API_KEY = "K82166208188957"; // Replace with your API key
+const OCR_URL = "https://api.ocr.space/parse/image";
 
-export async function runOCR(imageUri: string): Promise<string> {
+async function runSingleOCR(imageUri: string): Promise<string> {
   try {
-    // ✅ Use the new FileSystem API: create a File handle and read as Base64
-    const file = await FileSystem.getInfoAsync(imageUri);
-    if (!file.exists) {
-      console.warn("File not found:", imageUri);
-      return "";
-    }
-
-    // Expo 54+: use readAsStringAsync with string literal encoding
     const base64 = await FileSystem.readAsStringAsync(imageUri, {
-      encoding: "base64",
+      encoding: FileSystem.EncodingType.Base64,
     });
 
-    const body = new FormData();
-    body.append("apikey", OCR_API_KEY);
-    body.append("base64Image", `data:image/jpg;base64,${base64}`);
-    body.append("language", "eng");
+    const formData = new FormData();
+    formData.append("apikey", OCR_API_KEY);
+    formData.append("isTable", "true");
+    formData.append("scale", "true");
+    formData.append("OCREngine", "2");
+    formData.append("base64Image", `data:image/jpg;base64,${base64}`);
 
-    const response = await fetch("https://api.ocr.space/parse/image", {
-      method: "POST",
-      body,
-    });
+    const res = await withTimeout(
+      fetch(OCR_URL, {
+        method: "POST",
+        body: formData,
+      }),
+      25000 // 25 s timeout
+    );
 
-    const result = await response.json();
+    const data = await res.json();
 
-    if (result?.ParsedResults?.[0]?.ParsedText) {
-      return result.ParsedResults[0].ParsedText;
-    } else {
-      console.warn("OCR response error:", result);
-      return "";
+    if (data?.ParsedResults?.length > 0) {
+      return data.ParsedResults.map((r: any) => r.ParsedText).join("\n");
     }
-  } catch (e: any) {
-    console.error("OCR request failed:", e?.message);
+    return "";
+  } catch (e) {
+    console.error("OCR error:", e);
+    return "";
+  }
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms = 25000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("OCR request timed out")), ms)),
+  ]);
+}
+
+// 🔹 NEW: Run OCR on multiple pages
+export async function runOCRMulti(images: string[]): Promise<string> {
+  try {
+    const results: string[] = [];
+    for (const img of images) {
+      const text = await runSingleOCR(img);
+      if (text) results.push(text);
+    }
+    return results.join("\n---PAGE BREAK---\n");
+  } catch (e) {
+    console.error("Multi-page OCR failed:", e);
     return "";
   }
 }

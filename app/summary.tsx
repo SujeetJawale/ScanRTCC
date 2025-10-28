@@ -35,7 +35,8 @@ export default function Summary() {
         total: String(item.total),
         invoiceNumber: item.invoiceNumber || "",
         itemCount: String(item.itemCount || ""),
-        imageUri: item.pdfUri || "",
+        images: JSON.stringify(item.images || []), // ✅ pass all photos
+        pdfUri: item.pdfUri || "",
       },
     });
   }
@@ -116,7 +117,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 6,
   },
-  btnText: { color: "#fff", fontWeight: "700" },
+  btnText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
+  },
   total: { fontSize: 18, fontWeight: "700", textAlign: "right", marginTop: 8 },
   bottomButtons: {
     flexDirection: "row",
@@ -132,3 +137,7 @@ const styles = StyleSheet.create({
   },
   mainText: { color: "#fff", fontWeight: "700" },
 });
+
+export const options = {
+  title: "Today's Summary",
+};

@@ -2,15 +2,15 @@
   "expo": {
     "name": "Scanify",
     "slug": "scanify",
-    "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSCameraUsageDescription": "Scanify uses the camera to scan invoices.",
-        "NSPhotoLibraryAddUsageDescription": "Scanify can save generated PDFs and images to your library."
-      }
+    "scheme": "scanify",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F9FAFB"
     },
-    "plugins": [
-      "expo-mail-composer"
-    ]
+    "backgroundColor": "#F9FAFB"
   }
 }
